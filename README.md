@@ -8,6 +8,8 @@
 
 # Installation
  - docker-compose up -d 
+ - docker exec -it distances_postcode_php_1 bash
+ - composer install
 
 # Stacks
  - PHP
