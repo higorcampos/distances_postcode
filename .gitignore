@@ -1,23 +1,15 @@
-/vendor/
-node_modules/
-npm-debug.log
-yarn-error.log
+# Ignore everything in the root except the "wp-content" directory.
+/*
+!.gitignore
+!nginx
+db_data
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
 
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
+nginx/*
+!nginx/site.conf
 
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
-
-storage/*.key
-.env
-Homestead.yaml
-Homestead.json
-/.vagrant
-.phpunit.result.cache
+!sql
+!docker-compose.yml
+!node.dockerfile
+!php.dockerfile
+!php.ini
