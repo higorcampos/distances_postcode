@@ -2,6 +2,7 @@
 /*
 !.gitignore
 !nginx
+!www
 db_data
 
 
