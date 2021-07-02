@@ -7,11 +7,11 @@ use Prettus\Repository\Contracts\Transformable;
 use Prettus\Repository\Traits\TransformableTrait;
 
 /**
- * Class Distance.
+ * Class Distances.
  *
  * @package namespace App\Entities;
  */
-class Distance extends Model implements Transformable
+class Distances extends Model implements Transformable
 {
     use TransformableTrait;
 
