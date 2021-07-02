@@ -48,16 +48,8 @@ class DistancesController extends Controller
      */
     public function index()
     {
-        $this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
+        // $this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
         $distances = $this->repository->all();
-
-        if (request()->wantsJson()) {
-
-            return response()->json([
-                'data' => $distances,
-            ]);
-        }
-
         return view('distances.index', compact('distances'));
     }
 
