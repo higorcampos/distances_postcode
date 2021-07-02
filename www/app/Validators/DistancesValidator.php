@@ -6,11 +6,11 @@ use \Prettus\Validator\Contracts\ValidatorInterface;
 use \Prettus\Validator\LaravelValidator;
 
 /**
- * Class DistanceValidator.
+ * Class DistancesValidator.
  *
  * @package namespace App\Validators;
  */
-class DistanceValidator extends LaravelValidator
+class DistancesValidator extends LaravelValidator
 {
     /**
      * Validation Rules

@@ -13,6 +13,8 @@
  - chmod -R 777 /var/www/html/storage
  - Database does not require attention automatic import
  - Rename File .env.example for .env in folder WWW
+ - docker exec -it distances_postcode_node_1 bash
+ - npm install
 
 # Stacks
  - PHP

@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Prettus\Validator\Contracts\ValidatorInterface;
 use Prettus\Validator\Exceptions\ValidatorException;
-use App\Http\Requests\DistanceCreateRequest;
-use App\Http\Requests\DistanceUpdateRequest;
-use App\Repositories\DistanceRepository;
-use App\Validators\DistanceValidator;
+use App\Http\Requests\DistancesCreateRequest;
+use App\Http\Requests\DistancesUpdateRequest;
+use App\Repositories\DistancesRepository;
+use App\Validators\DistancesValidator;
 
 /**
  * Class DistancesController.
@@ -20,22 +20,22 @@ use App\Validators\DistanceValidator;
 class DistancesController extends Controller
 {
     /**
-     * @var DistanceRepository
+     * @var DistancesRepository
      */
     protected $repository;
 
     /**
-     * @var DistanceValidator
+     * @var DistancesValidator
      */
     protected $validator;
 
     /**
      * DistancesController constructor.
      *
-     * @param DistanceRepository $repository
-     * @param DistanceValidator $validator
+     * @param DistancesRepository $repository
+     * @param DistancesValidator $validator
      */
-    public function __construct(DistanceRepository $repository, DistanceValidator $validator)
+    public function __construct(DistancesRepository $repository, DistancesValidator $validator)
     {
         $this->repository = $repository;
         $this->validator  = $validator;
@@ -48,30 +48,74 @@ class DistancesController extends Controller
      */
     public function index()
     {
-        // $this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
-        $distances = $this->repository->all();
-        return view('distances.index', compact('distances'));
+        $distances = $this->repository->paginate(1);
+        return view('home', compact('distances'));
     }
+
+    /**
+     * Display form.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('create');
+    }
+
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  DistanceCreateRequest $request
+     * @param  DistancesCreateRequest $request
      *
      * @return \Illuminate\Http\Response
      *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
-    public function store(DistanceCreateRequest $request)
+    public function store(DistancesCreateRequest $request)
     {
+
         try {
 
             $this->validator->with($request->all())->passesOrFail(ValidatorInterface::RULE_CREATE);
+            $data = $request->all();
 
-            $distance = $this->repository->create($request->all());
+      
+            $postcode_origin = $data['postcode_origin'];
+            $postcode_destiny = $data['postcode_destiny'];
+            
+            $postcode_origin_uri = "https://www.cepaberto.com/api/v3/cep?cep=". $postcode_origin;
+            $postcode_destiny_uri = "https://www.cepaberto.com/api/v3/cep?cep=". $postcode_destiny;
+            
+            $result_origin = $this->request_cep_aberto($postcode_origin_uri);
+            $result_destiny = $this->request_cep_aberto($postcode_destiny_uri);
+
+            if (!empty($postcode_origin) && !empty($postcode_destiny)){
+
+                $calculated = [];
+
+               
+                if (!empty($result_origin) && !empty($result_destiny)){
+                    $calculated = [
+                        'lat_1'     =>$result_origin->latitude,
+                        'long_1'    =>$result_origin->longitude,
+                        'lat_2'     =>$result_destiny->latitude,
+                        'long_2'    =>$result_destiny->longitude,
+                    ];
+
+                    $data['calculated_distance'] = $this->calculated_distance($calculated);
+
+                }
+               
+
+                // return $this->request($uri);
+            }
+
+
+            $distance = $this->repository->create($data);
 
             $response = [
-                'message' => 'Distance created.',
+                'message' => 'Distances created.',
                 'data'    => $distance->toArray(),
             ];
 
@@ -80,7 +124,8 @@ class DistancesController extends Controller
                 return response()->json($response);
             }
 
-            return redirect()->back()->with('message', $response['message']);
+            return redirect('/')->with('status', 'Updated!');
+
         } catch (ValidatorException $e) {
             if ($request->wantsJson()) {
                 return response()->json([
@@ -125,38 +170,68 @@ class DistancesController extends Controller
     {
         $distance = $this->repository->find($id);
 
-        return view('distances.edit', compact('distance'));
+        return view('edit', compact('distance'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  DistanceUpdateRequest $request
+     * @param  DistancesUpdateRequest $request
      * @param  string            $id
      *
      * @return Response
      *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
-    public function update(DistanceUpdateRequest $request, $id)
+    public function update(DistancesUpdateRequest $request, $id)
     {
         try {
 
             $this->validator->with($request->all())->passesOrFail(ValidatorInterface::RULE_UPDATE);
 
-            $distance = $this->repository->update($request->all(), $id);
+           
+            $data = $request->all();
+
+                  
+            $postcode_origin = $data['postcode_origin'];
+            $postcode_destiny = $data['postcode_destiny'];
+            
+            $postcode_origin_uri = "https://www.cepaberto.com/api/v3/cep?cep=". $postcode_origin;
+            $postcode_destiny_uri = "https://www.cepaberto.com/api/v3/cep?cep=". $postcode_destiny;
+            
+            $result_origin = $this->request_cep_aberto($postcode_origin_uri);
+            $result_destiny = $this->request_cep_aberto($postcode_destiny_uri);
+
+            if (!empty($postcode_origin) && !empty($postcode_destiny)){
+
+                $calculated = [];
+
+               
+                if (!empty($result_origin) && !empty($result_destiny)){
+                    $calculated = [
+                        'lat_1'     =>$result_origin->latitude,
+                        'long_1'    =>$result_origin->longitude,
+                        'lat_2'     =>$result_destiny->latitude,
+                        'long_2'    =>$result_destiny->longitude,
+                    ];
+
+                    $data['calculated_distance'] = $this->calculated_distance($calculated);
+
+                }
+               
+
+                // return $this->request($uri);
+            }
+
+            $distance = $this->repository->update($data, $id);
 
             $response = [
-                'message' => 'Distance updated.',
+                'message' => 'Distances updated.',
                 'data'    => $distance->toArray(),
             ];
 
-            if ($request->wantsJson()) {
 
-                return response()->json($response);
-            }
-
-            return redirect()->back()->with('message', $response['message']);
+            return redirect('/')->with('status', 'Updated!');
         } catch (ValidatorException $e) {
 
             if ($request->wantsJson()) {
@@ -186,11 +261,52 @@ class DistancesController extends Controller
         if (request()->wantsJson()) {
 
             return response()->json([
-                'message' => 'Distance deleted.',
+                'message' => 'Distances deleted.',
                 'deleted' => $deleted,
             ]);
         }
 
-        return redirect()->back()->with('message', 'Distance deleted.');
+        return redirect()->back()->with('message', 'Distances deleted.');
+    }
+
+    /**
+     * Request CEP Aberto
+     *
+     * @param $request
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function request_cep_aberto($uri) {
+        if (!empty($uri)){
+            try {
+                $request = curl_init();
+                curl_setopt ($request, CURLOPT_HTTPHEADER, array('Authorization: ' . 'Token token=a12946fcf67eba8e8d273c4462d89267')); // Access token for request.
+                curl_setopt ($request, CURLOPT_URL, $uri); // Request URL.
+                curl_setopt ($request, CURLOPT_RETURNTRANSFER, 1); 
+                curl_setopt ($request, CURLOPT_CONNECTTIMEOUT, 5); // Connect time out.
+                curl_setopt ($request, CURLOPT_CUSTOMREQUEST, 'GET'); // HTPP Request Type.
+                $file_contents = curl_exec($request);
+                curl_close($request);
+        
+                return json_decode($file_contents);
+
+            } catch (ValidatorException $e){
+                return $e->getMessage();
+            }
+        }
+    }
+
+    public function calculated_distance($data)
+    {
+      
+        $rad = M_PI / 180;
+        //Calculate distance from latitude and longitude
+        $theta = $data['long_1'] - $data['long_2'];
+        $dist = sin($data['lat_1'] * $rad) 
+            * sin($data['lat_2'] * $rad) +  cos($data['lat_1'] * $rad)
+            * cos($data['lat_2'] * $rad) * cos($theta * $rad);
+
+        return acos($dist) / $rad * 60 *  1.853;
     }
 }

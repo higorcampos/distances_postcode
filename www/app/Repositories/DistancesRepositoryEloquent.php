@@ -4,16 +4,16 @@ namespace App\Repositories;
 
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Criteria\RequestCriteria;
-use App\Repositories\DistanceRepository;
-use App\Entities\Distance;
-use App\Validators\DistanceValidator;
+use App\Repositories\DistancesRepository;
+use App\Entities\Distances;
+use App\Validators\DistancesValidator;
 
 /**
- * Class DistanceRepositoryEloquent.
+ * Class DistancesRepositoryEloquent.
  *
  * @package namespace App\Repositories;
  */
-class DistanceRepositoryEloquent extends BaseRepository implements DistanceRepository
+class DistancesRepositoryEloquent extends BaseRepository implements DistancesRepository
 {
     /**
      * Specify Model class name
@@ -22,7 +22,7 @@ class DistanceRepositoryEloquent extends BaseRepository implements DistanceRepos
      */
     public function model()
     {
-        return Distance::class;
+        return Distances::class;
     }
 
     /**
@@ -33,7 +33,7 @@ class DistanceRepositoryEloquent extends BaseRepository implements DistanceRepos
     public function validator()
     {
 
-        return DistanceValidator::class;
+        return DistancesValidator::class;
     }
 
 
