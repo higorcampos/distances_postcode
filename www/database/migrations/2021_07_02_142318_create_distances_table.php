@@ -17,9 +17,9 @@ class CreateDistancesTable extends Migration
 	{
 		Schema::create('distances', function(Blueprint $table) {
             $table->increments('id');
-			$table->string('postcode_origin');
-			$table->string('postcode_destiny');
-			$table->longText('calculated_distance');
+			$table->string('postcode_origin')->nullable();
+			$table->string('postcode_destiny')->nullable();
+			$table->longText('calculated_distance')->nullable();
             $table->timestamps();
 		});
 	}
